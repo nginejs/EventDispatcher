@@ -3,13 +3,17 @@ var gulp = require('gulp'),
   sourcemaps = require('gulp-sourcemaps'),
   coffeelint = require('gulp-coffeelint'),
   coffee = require('gulp-coffee'),
+  uglify = require('gulp-uglify'),
+  rename = require('gulp-rename'),
   karma = require('gulp-karma'),
+  bump = require('gulp-bump'),
 
   config = {
     path: {
       src: './src',
       test: './test',
-      build: './.tmp',
+      buildSrc: './.tmp/src',
+      buildTest: './.tmp/test',
       dist: './build'
     }
   };
@@ -20,11 +24,9 @@ gulp.task('build', function () {
     .pipe(coffeelint())
     .pipe(coffeelint.reporter())
     .pipe(sourcemaps.init())
-    .pipe(coffee({
-
-    }))
+    .pipe(coffee())
     .pipe(sourcemaps.write())
-    .pipe(gulp.dest(config.path.build));
+    .pipe(gulp.dest(config.path.buildSrc));
 });
 
 
@@ -36,26 +38,44 @@ gulp.task('test-prepare', function () {
 
     }))
     .on('error', gutil.log)
-    .pipe(gulp.dest(appConfig.tmp + '/test'))
+    .pipe(gulp.dest(config.path.buildTest))
 });
 
 
 gulp.task('test', ['test-prepare'], function () {
   return gulp.src([
-    config.path.build + '/**/*.js',
+    config.path.buildSrc + '/**/*.js',
+    config.path.buildTest + '/spec/*.js',
   ])
-  .pipe($.karma({
-    configFile: appConfig.tmp + '/test/karma.conf.js',
+  .pipe(karma({
+    configFile: config.path.buildTest + '/karma.conf.js',
     action: 'run'
   }))
   .on('error', function(err) {
-    // Make sure failed tests cause gulp to exit non-zero
     throw err;
   });
 });
 
 
-gulp.task('deploy', []);
+gulp.task('bump', function(){
+  gulp.src('./*.json')
+  .pipe(bump({type: 'build'}))
+  .pipe(gulp.dest('./'));
+});
+
+
+gulp.task('deploy', function () {
+  return gulp.src(config.path.buildSrc + '/EventDispatcher.js')
+    .pipe(gulp.dest(config.path.dist))
+    .on('finish', function () {
+      return gulp.src(config.path.buildSrc + '/**/*.js')
+        .pipe(uglify())
+        .pipe(rename({
+          extname: '.min.js'
+        }))
+        .pipe(gulp.dest(config.path.dist));
+    });
+});
 
 
 gulp.task('default', ['build', 'test', 'deploy'])
