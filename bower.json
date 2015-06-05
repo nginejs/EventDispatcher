@@ -1,0 +1,31 @@
+{
+  "name": "EventDispatcher",
+  "version": "0.0.1",
+  "homepage": "https://github.com/nginejs/EventDispatcher",
+  "authors": [
+    "nginejs <nginejs@gmail.com>"
+  ],
+  "description": "EventDispatcher micro framework for event-based communication in JavaScript",
+  "main": "build/EventDispatcher.min.js",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "eventdispatcher",
+    "event",
+    "events",
+    "trigger",
+    "on",
+    "off",
+    "nginejs",
+    "ngine"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
